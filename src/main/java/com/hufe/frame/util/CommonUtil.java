@@ -22,11 +22,11 @@ public class CommonUtil {
 
   public static String getProxyScript(String endpoint, String bucketName, String projectName, String uuid, Integer sourceType) {
     String uri = endpoint + "/" + bucketName + "/" + projectName + "/" + uuid;
-    String script = "";
+    String script = "/" + projectName + "\\/?$/" + " " + uri + "/index.html\n";
     if (sourceType == ProjectSourceEnum.Outpatient.getValue()) {
       script += "/" + projectName + "/" + "filelist.js.*/" + " " + uri + "/filelist.js\n";
     }
-    script += "/" + projectName + "/(.*)/" + " " + uri + "/$1";
+    script += "/" + projectName + "/(.+)/" + " " + uri + "/$1";
     return script;
   }
 
