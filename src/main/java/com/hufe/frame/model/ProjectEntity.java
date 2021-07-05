@@ -1,9 +1,7 @@
 package com.hufe.frame.model;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
