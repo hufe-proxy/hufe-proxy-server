@@ -13,13 +13,13 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
   Optional<ProjectEntity> findByNameAndIdNot(String name, Long id);
 
-  @Query("select count(u) from ProjectEntity u where u.name like '%:keyword%' and u.isActive = true")
+  @Query("select count(u) from ProjectEntity u where u.name like %:keyword% and u.isActive = true")
   long count(@Param("keyword") String keyword);
 
   @Query("select count(u) from ProjectEntity u where u.isActive = true")
   long count();
 
-  @Query("select u from ProjectEntity u where u.name like '%:keyword%' and u.isActive = true order by u.id DESC")
+  @Query("select u from ProjectEntity u where u.name like %:keyword% and u.isActive = true order by u.id DESC")
   Page<ProjectEntity> findAll(@Param("keyword") String keyword, Pageable pageable);
 
   @Query("select u from ProjectEntity u where u.isActive = true order by u.id DESC")

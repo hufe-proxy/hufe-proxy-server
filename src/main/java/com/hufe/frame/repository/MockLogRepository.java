@@ -9,13 +9,13 @@ import org.springframework.data.repository.query.Param;
 
 public interface MockLogRepository extends JpaRepository<MockLogEntity, Long> {
 
-  @Query("select count(u) from MockLogEntity u where u.name like '%:keyword%' and u.isActive = true")
+  @Query("select count(u) from MockLogEntity u where u.address like %:keyword% and u.isActive = true")
   long count(@Param("keyword") String keyword);
 
   @Query("select count(u) from MockLogEntity u where u.isActive = true")
   long count();
 
-  @Query("select u from MockLogEntity u where u.name like '%:keyword%' and u.isActive = true order by u.id DESC")
+  @Query("select u from MockLogEntity u where u.address like %:keyword% and u.isActive = true order by u.id DESC")
   Page<MockLogEntity> findAll(@Param("keyword") String keyword, Pageable pageable);
 
   @Query("select u from MockLogEntity u where u.isActive = true order by u.id DESC")
