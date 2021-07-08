@@ -71,7 +71,7 @@ public class PublishLogServiceImpl implements PublishLogService {
         .projectSourceType(p.getProjectSourceType())
         .userName(p.getUserName())
         .createAt(p.getCreateAt())
-        .proxyScript(CommonUtil.getProxyScript(endpoint, bucketName, p.getProjectName(), p.getUuid(), p.getProjectSourceType()))
+        .proxyScript(CommonUtil.getPublishLogProxyScript(endpoint, bucketName, p.getProjectName(), p.getUuid(), p.getProjectSourceType()))
         .build()).collect(Collectors.toList()))
       .build();
   }

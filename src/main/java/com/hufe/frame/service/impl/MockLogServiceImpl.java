@@ -62,7 +62,7 @@ public class MockLogServiceImpl implements MockLogService {
                     .remark(r.getRemark())
                     .content(r.getContent())
                     .createAt(r.getCreateAt())
-                    .proxyScript(r.getAddress() + " " + endpoint + "/" + bucketName + "/mock/" + r.getName())
+                    .proxyScript(CommonUtil.getMockLogProxyScript(endpoint, bucketName, r.getName(), r.getAddress()))
                     .build()).collect(Collectors.toList()))
             .build();
   }
@@ -88,7 +88,7 @@ public class MockLogServiceImpl implements MockLogService {
       fos.write(jsonStr);
       FileInputStream fis = new FileInputStream(file);
       // 上传到minio
-      minioUtil.putObject(bucketName, "mock/" + name, fis);
+      minioUtil.putObject(bucketName, "mock/" + name, fis, fis.available());
       fis.close();
       fos.close();
       file.delete();
@@ -142,7 +142,7 @@ public class MockLogServiceImpl implements MockLogService {
         fos.write(jsonStr);
         FileInputStream fis = new FileInputStream(file);
         // 上传到minio
-        minioUtil.putObject(bucketName, "mock/" + name, fis);
+        minioUtil.putObject(bucketName, "mock/" + name, fis, fis.available());
         fis.close();
         fos.close();
         file.delete();

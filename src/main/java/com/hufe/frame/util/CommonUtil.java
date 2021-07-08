@@ -20,7 +20,7 @@ public class CommonUtil {
     return nowDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-ms"));
   }
 
-  public static String getProxyScript(String endpoint, String bucketName, String projectName, String uuid, Integer sourceType) {
+  public static String getPublishLogProxyScript(String endpoint, String bucketName, String projectName, String uuid, Integer sourceType) {
     String uri = endpoint + "/" + bucketName + "/" + projectName + "/" + uuid;
     String script = "/" + projectName + "\\/?$/" + " " + uri + "/index.html\n";
     if (sourceType == ProjectSourceEnum.Outpatient.getValue()) {
@@ -28,6 +28,10 @@ public class CommonUtil {
     }
     script += "/" + projectName + "/(.+)/" + " " + uri + "/$1";
     return script;
+  }
+
+  public static String getMockLogProxyScript(String endpoint, String bucketName, String name, String address) {
+    return address + " " + endpoint + "/" + bucketName + "/mock/" + name + " method://get";
   }
 
 }
