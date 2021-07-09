@@ -29,11 +29,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MockLogServiceImpl implements MockLogService {
 
-  @Value("${minio.endpoint}")
+  @Value("${mock.log.endpoint}")
   private String endpoint;
 
-  @Value("${minio.bucketName}")
-  private String bucketName;
+  @Value("${mock.log.dir}")
+  private String logDir;
 
   @Autowired
   private MinioUtil minioUtil;
@@ -62,7 +62,7 @@ public class MockLogServiceImpl implements MockLogService {
                     .remark(r.getRemark())
                     .content(r.getContent())
                     .createAt(r.getCreateAt())
-                    .proxyScript(CommonUtil.getMockLogProxyScript(endpoint, bucketName, r.getName(), r.getAddress()))
+                    .proxyScript(CommonUtil.getMockLogProxyScript(endpoint, r.getName(), r.getAddress()))
                     .build()).collect(Collectors.toList()))
             .build();
   }
@@ -82,16 +82,11 @@ public class MockLogServiceImpl implements MockLogService {
             .build());
     // 写入内容到输出流
     try {
-      File file = new File(name);
+      File file = new File(logDir + "/" + name);
       FileOutputStream fos = new FileOutputStream(file);
       byte[] jsonStr = params.getContent().getBytes();
       fos.write(jsonStr);
-      FileInputStream fis = new FileInputStream(file);
-      // 上传到minio
-      minioUtil.putObject(bucketName, "mock/" + name, fis, fis.available());
-      fis.close();
       fos.close();
-      file.delete();
     } catch (Exception error) {
       throw new FrameMessageException(error.toString());
     }
@@ -111,7 +106,8 @@ public class MockLogServiceImpl implements MockLogService {
     mockLogRepository.save(mockLog);
     // 删除minio记录
     try {
-      minioUtil.batchRemoveObject(bucketName, "mock/" + mockLog.getName());
+      File file = new File(logDir + "/" + mockLog.getName());
+      file.delete();
     } catch (Exception error) {
       throw new FrameMessageException(error.toString());
     }
@@ -136,16 +132,11 @@ public class MockLogServiceImpl implements MockLogService {
     if (!content.equals(params.getContent())) {
       try {
         String name = mockLog.getName();
-        File file = new File(name);
+        File file = new File(logDir + "/" + mockLog.getName());
         FileOutputStream fos = new FileOutputStream(file);
         byte[] jsonStr = params.getContent().getBytes();
         fos.write(jsonStr);
-        FileInputStream fis = new FileInputStream(file);
-        // 上传到minio
-        minioUtil.putObject(bucketName, "mock/" + name, fis, fis.available());
-        fis.close();
         fos.close();
-        file.delete();
       } catch (Exception error) {
         throw new FrameMessageException(error.toString());
       }

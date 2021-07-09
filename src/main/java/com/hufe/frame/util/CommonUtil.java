@@ -30,8 +30,8 @@ public class CommonUtil {
     return script;
   }
 
-  public static String getMockLogProxyScript(String endpoint, String bucketName, String name, String address) {
-    return address + " " + endpoint + "/" + bucketName + "/mock/" + name + " method://get";
+  public static String getMockLogProxyScript(String endpoint, String name, String address) {
+    return address + " " + endpoint + "/" + name + " method://get";
   }
 
 }
