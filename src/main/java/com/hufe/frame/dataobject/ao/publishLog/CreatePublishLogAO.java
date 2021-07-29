@@ -10,6 +10,12 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class CreatePublishLogAO {
 
+  @ApiModelProperty(value = "主机名称")
+  private String hostName;
+
+  @ApiModelProperty(value = "主机版本")
+  private String hostVersion;
+
   @ApiModelProperty(value = "发布名称", required = true)
   @NotNull
   private String name;

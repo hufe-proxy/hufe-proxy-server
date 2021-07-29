@@ -28,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,22 +65,22 @@ public class PublishLogServiceImpl implements PublishLogService {
       raw = publishLogRepository.findPublishLogAll(pageable);
     }
     return PublishLogShowVO.builder()
-      .count(count)
-      .data(raw.stream().map(p -> PublishLogVO.builder()
-        .id(p.getId())
-        .publishLogName(p.getPublishLogName())
-        .projectName(p.getProjectName())
-        .projectSourceType(p.getProjectSourceType())
-        .userName(p.getUserName())
-        .createAt(p.getCreateAt())
-        .proxyScript(CommonUtil.getPublishLogProxyScript(endpoint, bucketName, p.getProjectName(), p.getUuid(), p.getProjectSourceType()))
-        .build()).collect(Collectors.toList()))
-      .build();
+            .count(count)
+            .data(raw.stream().map(p -> PublishLogVO.builder()
+                    .id(p.getId())
+                    .publishLogName(p.getPublishLogName())
+                    .projectName(p.getProjectName())
+                    .projectSourceType(p.getProjectSourceType())
+                    .userName(p.getUserName())
+                    .createAt(p.getCreateAt())
+                    .proxyScript(CommonUtil.getPublishLogProxyScript(endpoint, bucketName, p.getProjectName(), p.getUuid()))
+                    .build()).collect(Collectors.toList()))
+            .build();
   }
 
   @Override
   @Transactional
-  public void addPublishLog(Long userId, CreatePublishLogAO params, MultipartFile file) {
+  public String addPublishLog(Long userId, CreatePublishLogAO params, MultipartFile file) {
     // 验证项目是否存在
     Optional<ProjectEntity> projectOptional = projectRepository.findById(params.getProjectId());
     if (!projectOptional.isPresent()) {
@@ -91,12 +93,19 @@ public class PublishLogServiceImpl implements PublishLogService {
       // 解压压缩包
       ZipArchiveInputStream zis = new ZipArchiveInputStream(file.getInputStream(), "GBK", true);
       ZipArchiveEntry entry = zis.getNextZipEntry();
-      String firstDir = entry.getName();
+      // 确定目录
+      String firstRoute = entry.getName();
+      Pattern p = Pattern.compile("([^/]+/).*");
+      Matcher m = p.matcher(firstRoute);
+      if (!m.find()) {
+        throw new FrameMessageException("上传压缩文件不合法");
+      }
+      String firstDir = m.group(1);
       while (entry != null) {
-        boolean isDir = !entry.isDirectory();
+        boolean isFile = !entry.isDirectory();
         String dirName = entry.getName();
         // minio文件上传
-        if (isDir) {
+        if (isFile) {
           String objectName = project.getName() + "/" + uuid + "/" + dirName.replace(firstDir, "");
           minioUtil.putObject(bucketName, objectName, zis, entry.getSize());
         }
@@ -108,11 +117,14 @@ public class PublishLogServiceImpl implements PublishLogService {
     }
     // 保存日志
     publishLogRepository.save(PublishLogEntity.builder()
-      .name(params.getName())
-      .projectId(params.getProjectId())
-      .uuid(uuid)
-      .userId(userId)
-      .build());
+            .hostName(params.getHostName())
+            .hostVersion(params.getHostVersion())
+            .name(params.getName())
+            .projectId(project.getId())
+            .uuid(uuid)
+            .userId(userId)
+            .build());
+    return CommonUtil.getPublishLogProxyScript(endpoint, bucketName, project.getName(), uuid);
   }
 
   @Override

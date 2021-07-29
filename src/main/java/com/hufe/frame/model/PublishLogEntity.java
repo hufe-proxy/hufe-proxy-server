@@ -29,4 +29,10 @@ public class PublishLogEntity extends BaseEntity implements Serializable {
   // 用户id
   private Long userId;
 
+  // 发布主机名称
+  private String hostName;
+
+  // 发布主机版本
+  private String hostVersion;
+
 }

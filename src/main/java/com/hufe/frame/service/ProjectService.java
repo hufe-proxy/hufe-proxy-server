@@ -6,6 +6,7 @@ import com.hufe.frame.dataobject.ao.project.SearchProjectAO;
 import com.hufe.frame.dataobject.ao.project.UpdateProjectAO;
 import com.hufe.frame.dataobject.vo.project.ProjectOptionVO;
 import com.hufe.frame.dataobject.vo.project.ProjectShowVO;
+import com.hufe.frame.model.ProjectEntity;
 
 import java.util.List;
 
@@ -20,5 +21,7 @@ public interface ProjectService {
   void deleteProject(DeleteProjectAO params);
 
   void updateProject(UpdateProjectAO params);
+
+  ProjectEntity findTop1ByNameLike(String name);
 
 }

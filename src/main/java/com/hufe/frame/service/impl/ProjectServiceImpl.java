@@ -51,23 +51,23 @@ public class ProjectServiceImpl implements ProjectService {
       raw = projectRepository.findAll(pageable);
     }
     return ProjectShowVO.builder()
-      .count(count)
-      .data(raw.stream().map(r -> ProjectVO.builder()
-        .id(r.getId())
-        .name(r.getName())
-        .sourceType(r.getSourceType())
-        .createAt(r.getCreateAt())
-        .build()).collect(Collectors.toList()))
-      .build();
+            .count(count)
+            .data(raw.stream().map(r -> ProjectVO.builder()
+                    .id(r.getId())
+                    .name(r.getName())
+                    .sourceType(r.getSourceType())
+                    .createAt(r.getCreateAt())
+                    .build()).collect(Collectors.toList()))
+            .build();
   }
 
   @Override
   public List<ProjectOptionVO> getAll() {
     List<ProjectEntity> projectList = projectRepository.findAll();
-    return projectList.stream().map(p-> ProjectOptionVO.builder()
-      .value(p.getId())
-      .label(p.getName())
-      .build()).collect(Collectors.toList());
+    return projectList.stream().map(p -> ProjectOptionVO.builder()
+            .value(p.getId())
+            .label(p.getName())
+            .build()).collect(Collectors.toList());
   }
 
   @Override
@@ -75,9 +75,9 @@ public class ProjectServiceImpl implements ProjectService {
   public void addProject(CreateProjectAO params) {
     // 验证项目是否已经存在
     Example<ProjectEntity> example = Example.of(
-      ProjectEntity.builder()
-        .name(params.getName())
-        .build()
+            ProjectEntity.builder()
+                    .name(params.getName())
+                    .build()
     );
     Optional<ProjectEntity> projectOptional = projectRepository.findOne(example);
     if (projectOptional.isPresent()) {
@@ -87,9 +87,9 @@ public class ProjectServiceImpl implements ProjectService {
       String name = params.getName();
       // 增加项目
       projectRepository.save(ProjectEntity.builder()
-        .name(name)
-        .sourceType(params.getSourceType().getValue())
-        .build());
+              .name(name)
+              .sourceType(params.getSourceType().getValue())
+              .build());
       // 创建minio项目文件夹
       InputStream inputStream = this.getClass().getResourceAsStream("/static/canary.README");
       minioUtil.putObject(bucketName, name + "/" + name + ".README", inputStream);
@@ -140,6 +140,12 @@ public class ProjectServiceImpl implements ProjectService {
         throw new FrameMessageException(error.toString());
       }
     }
+  }
+
+  @Override
+  @Transactional
+  public ProjectEntity findTop1ByNameLike(String projectName) {
+    return projectRepository.findTop1ByNameLike("%" + projectName + "%");
   }
 
 }

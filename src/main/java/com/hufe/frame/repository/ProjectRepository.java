@@ -25,4 +25,6 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
   @Query("select u from ProjectEntity u where u.isActive = true order by u.id DESC")
   Page<ProjectEntity> findAll(Pageable pageable);
 
+  ProjectEntity findTop1ByNameLike(String projectName);
+
 }
