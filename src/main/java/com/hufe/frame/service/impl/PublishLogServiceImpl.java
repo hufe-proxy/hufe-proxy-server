@@ -27,6 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -107,7 +110,20 @@ public class PublishLogServiceImpl implements PublishLogService {
         // minio文件上传
         if (isFile) {
           String objectName = project.getName() + "/" + uuid + "/" + dirName.replace(firstDir, "");
-          minioUtil.putObject(bucketName, objectName, zis, entry.getSize());
+          long size = entry.getSize();
+          if (size == -1) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            while (true) {
+              int bytes = zis.read();
+              if (bytes == -1) break;
+              bos.write(bytes);
+            }
+            bos.close();
+            InputStream is = new ByteArrayInputStream(bos.toByteArray());
+            minioUtil.putObject(bucketName, objectName, is, is.available());
+          } else {
+            minioUtil.putObject(bucketName, objectName, zis, size);
+          }
         }
         entry = zis.getNextZipEntry();
       }
