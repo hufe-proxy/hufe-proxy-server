@@ -48,11 +48,11 @@ public class MockLogServiceImpl implements MockLogService {
     String keyword = params.getKeyword();
     Pageable pageable = PageRequest.of(params.getPageNo(), params.getPageSize());
     if (!"".equals(keyword) && keyword != null) {
-      count = mockLogRepository.count(keyword);
-      raw = mockLogRepository.findAll(keyword, pageable);
+      count = mockLogRepository.countByAddressContainingAndIsActiveTrue(keyword);
+      raw = mockLogRepository.findByAddressContainingAndIsActiveTrueOrderByIdDesc(keyword, pageable);
     } else {
-      count = mockLogRepository.count();
-      raw = mockLogRepository.findAll(pageable);
+      count = mockLogRepository.countByIsActiveTrue();
+      raw = mockLogRepository.findByIsActiveTrueOrderByIdDesc(pageable);
     }
     return MockLogShowVO.builder()
             .count(count)

@@ -4,21 +4,16 @@ import com.hufe.frame.model.MockLogEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface MockLogRepository extends JpaRepository<MockLogEntity, Long> {
 
-  @Query("select count(u) from MockLogEntity u where u.address like %:keyword% and u.isActive = true")
-  long count(@Param("keyword") String keyword);
+  long countByIsActiveTrue();
 
-  @Query("select count(u) from MockLogEntity u where u.isActive = true")
-  long count();
+  long countByAddressContainingAndIsActiveTrue(@Param("keyword") String keyword);
 
-  @Query("select u from MockLogEntity u where u.address like %:keyword% and u.isActive = true order by u.id DESC")
-  Page<MockLogEntity> findAll(@Param("keyword") String keyword, Pageable pageable);
+  Page<MockLogEntity> findByAddressContainingAndIsActiveTrueOrderByIdDesc(@Param("keyword") String keyword, Pageable pageable);
 
-  @Query("select u from MockLogEntity u where u.isActive = true order by u.id DESC")
-  Page<MockLogEntity> findAll(Pageable pageable);
+  Page<MockLogEntity> findByIsActiveTrueOrderByIdDesc(Pageable pageable);
 
 }
