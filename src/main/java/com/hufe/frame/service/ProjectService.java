@@ -22,6 +22,6 @@ public interface ProjectService {
 
   void updateProject(UpdateProjectAO params);
 
-  ProjectEntity findTop1ByNameLike(String name);
+  ProjectEntity findTop1ByNameContaining(String name);
 
 }

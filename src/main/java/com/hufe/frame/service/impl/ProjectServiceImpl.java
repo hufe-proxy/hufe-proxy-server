@@ -44,11 +44,11 @@ public class ProjectServiceImpl implements ProjectService {
     String keyword = params.getKeyword();
     Pageable pageable = PageRequest.of(params.getPageNo(), params.getPageSize());
     if (!"".equals(keyword) && keyword != null) {
-      count = projectRepository.count(keyword);
-      raw = projectRepository.findAll(keyword, pageable);
+      count = projectRepository.countByNameContainingAndIsActiveTrue(keyword);
+      raw = projectRepository.findByNameContainingAndIsActiveTrueOrderByIdDesc(keyword, pageable);
     } else {
-      count = projectRepository.count();
-      raw = projectRepository.findAll(pageable);
+      count = projectRepository.countByIsActiveTrue();
+      raw = projectRepository.findByIsActiveTrueOrderByIdDesc(pageable);
     }
     return ProjectShowVO.builder()
             .count(count)
@@ -144,8 +144,8 @@ public class ProjectServiceImpl implements ProjectService {
 
   @Override
   @Transactional
-  public ProjectEntity findTop1ByNameLike(String projectName) {
-    return projectRepository.findTop1ByNameLike("%" + projectName + "%");
+  public ProjectEntity findTop1ByNameContaining(String projectName) {
+    return projectRepository.findTop1ByNameContaining(projectName);
   }
 
 }

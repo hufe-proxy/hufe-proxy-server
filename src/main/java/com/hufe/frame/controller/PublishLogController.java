@@ -84,7 +84,7 @@ public class PublishLogController {
                                                   HttpServletRequest request
   ) {
     Long userId = Long.parseLong((String) request.getAttribute("userId"));
-    ProjectEntity publishLog = projectService.findTop1ByNameLike(projectName);
+    ProjectEntity publishLog = projectService.findTop1ByNameContaining(projectName);
     if (publishLog == null) {
       throw new FrameMessageException("项目没有注册到平台");
     }
