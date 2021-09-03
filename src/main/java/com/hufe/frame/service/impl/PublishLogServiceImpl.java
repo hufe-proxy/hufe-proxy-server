@@ -5,6 +5,9 @@ import com.hufe.frame.dataobject.ao.publishLog.CreatePublishLogAO;
 import com.hufe.frame.dataobject.ao.publishLog.DeletePublishLogAO;
 import com.hufe.frame.dataobject.ao.publishLog.SearchPublishLogAO;
 import com.hufe.frame.dataobject.bo.PublishLogShowBO;
+import com.hufe.frame.dataobject.bo.SendNoticeAtBO;
+import com.hufe.frame.dataobject.bo.SendNoticeBO;
+import com.hufe.frame.dataobject.bo.SendNoticeTextBO;
 import com.hufe.frame.dataobject.po.exception.FrameMessageException;
 import com.hufe.frame.dataobject.vo.publishLog.PublishLogShowVO;
 import com.hufe.frame.dataobject.vo.publishLog.PublishLogVO;
@@ -23,13 +26,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +55,9 @@ public class PublishLogServiceImpl implements PublishLogService {
 
   @Value("${minio.bucketName}")
   private String bucketName;
+
+  @Value("${notice.uri}")
+  private String noticeUri;
 
   @Autowired
   private MinioUtil minioUtil;
@@ -141,6 +155,37 @@ public class PublishLogServiceImpl implements PublishLogService {
             .userId(userId)
             .build());
     return CommonUtil.getPublishLogProxyScript(endpoint, bucketName, project.getName(), uuid);
+  }
+
+  @Override
+  @Async
+  public void sendNotice(String projectName, CreatePublishLogAO params) {
+    try {
+      RestTemplate restTemplate = new RestTemplate();
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+      // 组装入参
+      DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      String now = format.format(new Date());
+      SendNoticeBO sendNotice = SendNoticeBO.builder()
+              .msgtype("text")
+              .text(SendNoticeTextBO.builder()
+                      .content(projectName
+                              + "已成功发布！\n发布备注："
+                              + params.getName()
+                              + "\n发布主机："
+                              + params.getHostName()
+                              + "\n发布时间："
+                              + now
+                              + "\n消息来源：WiNEX")
+                      .build())
+              .at(SendNoticeAtBO.builder().isAtAll(true).build())
+              .build();
+      HttpEntity<SendNoticeBO> entity = new HttpEntity<SendNoticeBO>(sendNotice, httpHeaders);
+      restTemplate.postForEntity(noticeUri, entity, String.class);
+    } catch (Exception exception) {
+      log.error("发送消息提醒失败：" + exception.toString());
+    }
   }
 
   @Override

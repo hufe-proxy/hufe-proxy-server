@@ -80,21 +80,26 @@ public class PublishLogController {
                                                   @ApiParam(name = "name", value = "发布名称", required = true) @NotNull String name,
                                                   @ApiParam(name = "projectName", value = "项目名称", required = true) @NotNull String projectName,
                                                   @ApiParam(name = "attach", value = "项目压缩包", required = true) @NotNull MultipartFile attach,
+                                                  @ApiParam(name = "isNotice", value = "是否广播发布信息", required = true) @NotNull Boolean isNotice,
                                                   @RequestHeader("x-token") String header,
                                                   HttpServletRequest request
   ) {
     Long userId = Long.parseLong((String) request.getAttribute("userId"));
-    ProjectEntity publishLog = projectService.findTop1ByNameContaining(projectName);
-    if (publishLog == null) {
+    ProjectEntity project = projectService.findTop1ByNameContaining(projectName);
+    if (project == null) {
       throw new FrameMessageException("项目没有注册到平台");
     }
     CreatePublishLogAO inputAO = CreatePublishLogAO.builder()
             .hostName(hostName)
             .hostVersion(hostVersion)
             .name(name)
-            .projectId(publishLog.getId())
+            .projectId(project.getId())
             .build();
     String script = publishLogService.addPublishLog(userId, inputAO, attach);
+    // 异步发送通知
+    if (isNotice) {
+      publishLogService.sendNotice(project.getName(), inputAO);
+    }
     return new FrameResponse(script);
   }
 

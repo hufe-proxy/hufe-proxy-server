@@ -12,6 +12,8 @@ public interface PublishLogService {
 
   String addPublishLog(Long userId, CreatePublishLogAO params, MultipartFile attach);
 
+  void sendNotice(String projectName, CreatePublishLogAO params);
+
   void deletePublishLog(DeletePublishLogAO params);
 
 }
