@@ -181,7 +181,7 @@ public class PublishLogServiceImpl implements PublishLogService {
                       .build())
               .at(SendNoticeAtBO.builder().isAtAll(true).build())
               .build();
-      HttpEntity<SendNoticeBO> entity = new HttpEntity<SendNoticeBO>(sendNotice, httpHeaders);
+      HttpEntity<SendNoticeBO> entity = new HttpEntity<>(sendNotice, httpHeaders);
       restTemplate.postForEntity(noticeUri, entity, String.class);
     } catch (Exception exception) {
       log.error("发送消息提醒失败：" + exception.toString());
