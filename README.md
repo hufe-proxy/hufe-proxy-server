@@ -1,4 +1,4 @@
-# winex-proxy-server
+# hufe-proxy-server
 
 ## develop
 
